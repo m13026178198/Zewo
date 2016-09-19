@@ -17,7 +17,7 @@ let package = Package(
         Target(name: "HTTPServer", dependencies: ["HTTPFile", "TCP", "Venice"]),
         Target(name: "HTTPClient", dependencies: ["HTTPFile", "TCP", "Venice"]),
 
-        Target(name: "RethinkDB", dependencies: ["Core", "TCP", "OpenSSL"]),
+        Target(name: "RethinkDB", dependencies: ["Core", "TCP", "Venice", "OpenSSL"]),
     ],
     dependencies: [
         .Package(url: "https://github.com/VeniceX/CLibvenice.git", majorVersion: 0, minor: 13),
