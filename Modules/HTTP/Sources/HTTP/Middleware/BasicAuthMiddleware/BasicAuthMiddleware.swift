@@ -23,13 +23,13 @@ public struct BasicAuthMiddleware : Middleware {
     public func respond(to request: Request, chainingTo chain: Responder) throws -> Response {
         switch type {
         case .server(let realm, let authenticate):
-            return try serverRespond(request, chain: chain, realm: realm, authenticate: authenticate)
+            return try serverRespond(to: request, chain: chain, realm: realm, authenticate: authenticate)
         case .client(let username, let password):
-            return try clientRespond(request, chain: chain, username: username, password: password)
+            return try clientRespond(to: request, chain: chain, username: username, password: password)
         }
     }
 
-    public func serverRespond(_ request: Request, chain: Responder, realm: String? = nil, authenticate: (_ username: String, _ password: String) throws -> AuthenticationResult) throws -> Response {
+    public func serverRespond(to request: Request, chain: Responder, realm: String? = nil, authenticate: (_ username: String, _ password: String) throws -> AuthenticationResult) throws -> Response {
         var deniedResponse : Response
         if let realm = realm {
             deniedResponse = Response(status: .unauthorized, headers: ["WWW-Authenticate": "Basic realm=\"\(realm)\""])
@@ -74,7 +74,7 @@ public struct BasicAuthMiddleware : Middleware {
         }
     }
 
-    public func clientRespond(_ request: Request, chain: Responder, username: String, password: String) throws -> Response {
+    public func clientRespond(to request: Request, chain: Responder, username: String, password: String) throws -> Response {
         var request = request
         let credentials = Data(username + ":" + password).base64EncodedString()
         request.authorization = "Basic " + credentials
