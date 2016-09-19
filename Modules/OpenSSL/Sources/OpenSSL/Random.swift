@@ -13,7 +13,7 @@ public enum SSLRandomError: Error {
 public class Random {
     public static func number(max: Int = Int.max) -> Int {
 		#if os(OSX) || os(iOS) || os(tvOS) || os(watchOS)
-			return Int(arc4random_uniform(UInt32(max)))
+			return Int(arc4random_uniform(UInt32(truncatingBitPattern: max)))
 		#elseif os(Linux)
 			return Int(random() % (max + 1))
 		#endif

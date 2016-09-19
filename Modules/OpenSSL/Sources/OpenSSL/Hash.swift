@@ -64,7 +64,7 @@ public struct Hash {
 
 	// MARK: - Hash
 
-	public static func hash(_ function: Function, message: Data) -> Data {
+	public static func hash(function: Function, message: Data) -> Data {
 		initialize()
 
 		var hashBuf = Data(count: function.digestLength)
@@ -78,7 +78,7 @@ public struct Hash {
 
 	// MARK: - HMAC
 
-	public static func hmac(_ function: Function, key: Data, message: Data) -> Data {
+	public static func hmac(function: Function, key: Data, message: Data) -> Data {
 		initialize()
 
 		var resultLen: UInt32 = 0
@@ -96,7 +96,7 @@ public struct Hash {
 
 	// MARK: - RSA
 
-	public static func rsa(_ function: Function, key: Key, message: Data) throws -> Data {
+	public static func rsa(function: Function, key: Key, message: Data) throws -> Data {
 		initialize()
 
 		let ctx = EVP_MD_CTX_create()
@@ -115,5 +115,30 @@ public struct Hash {
 			return Data(buf.prefix(Int(signLen)))
 		}
 	}
+    
+    // MARK: - PBKDF2
+    
+    public static func pbkdf2(function: Function, password: Data, salt: Data, iterations: Int, derivedKeyLength: Int? = nil) -> Data {
+        initialize()
+        
+        let bufLen = derivedKeyLength ?? function.digestLength
+        var buf = Data(count: bufLen)
+        _ = password.withUnsafeBytes { (passwordPtr: UnsafePointer<Int8>) in
+            salt.withUnsafeBytes { (saltPtr: UnsafePointer<UInt8>) in
+                buf.withUnsafeMutableBytes { (bufPtr: UnsafeMutablePointer<UInt8>) in
+                    COpenSSL.PKCS5_PBKDF2_HMAC(passwordPtr,
+                                               Int32(password.count),
+                                               saltPtr,
+                                               Int32(salt.count),
+                                               Int32(iterations),
+                                               function.evp,
+                                               Int32(bufLen),
+                                               bufPtr)
+                }
+            }
+        }
+        
+        return buf
+    }
 
 }
