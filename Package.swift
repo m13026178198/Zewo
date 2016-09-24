@@ -18,6 +18,7 @@ let package = Package(
         Target(name: "HTTPClient", dependencies: ["HTTPFile", "TCP", "Venice"]),
 
         Target(name: "RethinkDB", dependencies: ["Core", "TCP", "Venice", "OpenSSL"]),
+        Target(name: "ExampleApplication", dependencies: ["HTTPServer"]),
     ],
     dependencies: [
         .Package(url: "https://github.com/Zewo/CLibvenice.git", majorVersion: 0, minor: 13),
