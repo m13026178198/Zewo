@@ -78,6 +78,14 @@ extension Buffer {
     public subscript(_ range: Range<Int>) -> Buffer {
         return subdata(in: self.startIndex.advanced(by: range.lowerBound)..<self.startIndex.advanced(by: range.upperBound))
     }
+    
+    public func withUnsafeBufferPointer<Result, ContentType>(body: (UnsafeBufferPointer<ContentType>) throws -> Result) rethrows -> Result {
+        guard !self.isEmpty else {
+            let null = UnsafeMutablePointer<ContentType>.allocate(capacity: 0)
+            return try body(UnsafeBufferPointer<ContentType>(start: null, count: 0))
+        }
+        return try self.withUnsafeBytes { try body(UnsafeBufferPointer<ContentType>(start: $0, count: self.count)) }
+    }
 }
 
 extension String : BufferConvertible {
@@ -120,7 +128,6 @@ extension Buffer: CustomDebugStringConvertible {
 
 extension Buffer: Equatable {    
 }
-
 
 public func ==(lhs: Buffer, rhs: Buffer) -> Bool {
     guard lhs.count == rhs.count else {
