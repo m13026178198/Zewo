@@ -28,7 +28,7 @@ extension Body {
 }
 
 extension Body {
-    public mutating func becomeBuffer(deadline: Double = .never) throws -> Buffer {
+    public mutating func becomeBuffer(deadline: Double) throws -> Buffer {
         switch self {
         case .buffer(let buffer):
             return buffer
@@ -61,12 +61,12 @@ extension Body {
         }
     }
 
-    public mutating func becomeWriter(deadline: Double = .never) throws -> ((OutputStream) throws -> Void) {
+    public mutating func becomeWriter(deadline: Double) throws -> ((OutputStream) throws -> Void) {
         switch self {
         case .buffer(let buffer):
             let writer: ((OutputStream) throws -> Void) = { writer in
                 try writer.write(buffer, deadline: deadline)
-                try writer.flush()
+                try writer.flush(deadline: deadline)
             }
             self = .writer(writer)
             return writer
@@ -74,7 +74,7 @@ extension Body {
             let writer: ((OutputStream) throws -> Void) = { writer in
                 let buffer = try reader.drain(deadline: deadline)
                 try writer.write(buffer, deadline: deadline)
-                try writer.flush()
+                try writer.flush(deadline: deadline)
             }
             self = .writer(writer)
             return writer

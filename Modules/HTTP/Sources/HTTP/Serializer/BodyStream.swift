@@ -18,11 +18,11 @@ final class BodyStream : Stream {
         closed = true
     }
 
-    func read(into: UnsafeMutableBufferPointer<UInt8>, deadline: Double = .never) throws -> Int {
+    func read(into: UnsafeMutableBufferPointer<UInt8>, deadline: Double) throws -> Int {
         throw BodyStreamError.receiveUnsupported
     }
     
-    func write(_ buffer: UnsafeBufferPointer<UInt8>, deadline: Double = .never) throws {
+    func write(_ buffer: UnsafeBufferPointer<UInt8>, deadline: Double) throws {
         guard !buffer.isEmpty else {
             return
         }
@@ -38,7 +38,7 @@ final class BodyStream : Stream {
         try transport.write(newLine, deadline: deadline)
     }
 
-    func flush(deadline: Double = .never) throws {
-        try transport.flush()
+    func flush(deadline: Double) throws {
+        try transport.flush(deadline: deadline)
     }
 }

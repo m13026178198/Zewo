@@ -3,7 +3,7 @@
 public final class JSONMapSerializer : MapSerializer {
     private let stream: OutputStream
     private var ordering: Bool
-    private var deadline: Double = 0
+    private var deadline: Double = .never
     private var buffer: String = ""
 
     public convenience init(stream: OutputStream) {
@@ -115,7 +115,6 @@ public final class JSONMapSerializer : MapSerializer {
     private func write() throws {
         try stream.write(buffer, deadline: deadline)
         try stream.flush(deadline: deadline)
-        deadline = 0
         buffer = ""
     }
 }

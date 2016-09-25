@@ -15,7 +15,7 @@ public final class TCPStream : Stream {
         self.closed = false
     }
 
-    public init(host: String, port: Int, deadline: Double = .never) throws {
+    public init(host: String, port: Int, deadline: Double) throws {
         self.ip = try IP(remoteAddress: host, port: port, deadline: deadline)
         try ensureLastOperationSucceeded()
     }

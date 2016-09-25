@@ -18,7 +18,7 @@ public final class BufferStream : Stream {
         closed = true
     }
     
-    public func read(into targetBuffer: UnsafeMutableBufferPointer<UInt8>, deadline: Double = .never) throws -> Int {
+    public func read(into targetBuffer: UnsafeMutableBufferPointer<UInt8>, deadline: Double) throws -> Int {
         if closed && buffer.count == 0 {
             throw StreamError.closedStream(buffer: Buffer.empty)
         }
@@ -43,9 +43,9 @@ public final class BufferStream : Stream {
         return read
     }
     
-    public func write(_ sourceBuffer: UnsafeBufferPointer<UInt8>, deadline: Double = .never) {
+    public func write(_ sourceBuffer: UnsafeBufferPointer<UInt8>, deadline: Double) {
         buffer.append(Buffer(bytes: sourceBuffer))
     }
 
-    public func flush(deadline: Double = .never) throws {}
+    public func flush(deadline: Double) throws {}
 }

@@ -59,7 +59,7 @@ final class ServerStream : Core.Stream {
         outputBuffer.append(buffer)
     }
     
-    func flush(deadline: Double = .never) throws {
+    func flush(deadline: Double) throws {
         if closeOnFlush {
             close()
         }

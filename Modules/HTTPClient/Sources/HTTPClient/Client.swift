@@ -76,7 +76,7 @@ extension Client {
 
         do {
             // TODO: Add deadline to serializer
-            try serializer.serialize(request)
+            try serializer.serialize(request, deadline: requestDeadline)
             let response = try parser.parse(deadline: requestDeadline)
 
             if let upgrade = request.upgradeConnection {

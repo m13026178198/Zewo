@@ -12,6 +12,7 @@ public struct URLEncodedFormMapParser : MapParser {
 
     public func parse(deadline: Double) throws -> Map {
         let buffer = try stream.drain(deadline: deadline)
+        
         guard let string = try? String(buffer: buffer) else {
             throw URLEncodedFormMapParserError.unsupportedEncoding
         }

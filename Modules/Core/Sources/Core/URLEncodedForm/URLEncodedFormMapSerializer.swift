@@ -4,6 +4,7 @@ enum URLEncodedFormMapSerializerError : Error {
 
 public final class URLEncodedFormMapSerializer : MapSerializer {
     private var buffer: String = ""
+    private var deadline: Double = .never
     private let stream: OutputStream
 
     public init(stream: OutputStream) {
@@ -11,6 +12,8 @@ public final class URLEncodedFormMapSerializer : MapSerializer {
     }
 
     public func serialize(_ map: Map, deadline: Double) throws {
+        self.deadline = deadline
+
         switch map {
         case .dictionary(let dictionary):
             for (offset: index, element: (key: key, value: map)) in dictionary.enumerated() {
@@ -25,6 +28,7 @@ public final class URLEncodedFormMapSerializer : MapSerializer {
         default:
             throw URLEncodedFormMapSerializerError.invalidMap
         }
+        
         try writeBuffer()
     }
 
@@ -37,8 +41,8 @@ public final class URLEncodedFormMapSerializer : MapSerializer {
     }
 
     private func writeBuffer() throws {
-        try stream.write(buffer)
-        try stream.flush()
+        try stream.write(buffer, deadline: deadline)
+        try stream.flush(deadline: deadline)
         buffer = ""
     }
 }

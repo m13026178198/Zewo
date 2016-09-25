@@ -164,7 +164,7 @@ extension Server {
             do {
                 let request = try parser.parse(deadline: .never)
                 let response = try middleware.chain(to: responder).respond(to: request)
-                try serializer.serialize(response)
+                try serializer.serialize(response, deadline: .never)
 
                 if let upgrade = response.upgradeConnection {
                     try upgrade(request, stream)
@@ -182,7 +182,7 @@ extension Server {
                 }
 
                 let (response, unrecoveredError) = Server.recover(error: error)
-                try serializer.serialize(response)
+                try serializer.serialize(response, deadline: .never)
 
                 if let error = unrecoveredError {
                     throw error

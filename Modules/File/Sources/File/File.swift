@@ -33,6 +33,10 @@ extension FileMode {
     }
 }
 
+public let standardInputStream: Stream = try! File(fileDescriptor: STDIN_FILENO)
+public let standardOutputStream: Stream = try! File(fileDescriptor: STDOUT_FILENO)
+public let standardErrorStream: Stream = try! File(fileDescriptor: STDERR_FILENO)
+
 public final class File : Stream {
     fileprivate var file: mfile?
     public fileprivate(set) var closed = false
@@ -109,7 +113,7 @@ extension File {
         closed = true
     }
     
-    public func write(_ buffer: UnsafeBufferPointer<UInt8>, deadline: Double = .never) throws {
+    public func write(_ buffer: UnsafeBufferPointer<UInt8>, deadline: Double) throws {
         guard !buffer.isEmpty else {
             return
         }
@@ -123,7 +127,7 @@ extension File {
         }
     }
 
-    public func read(into: UnsafeMutableBufferPointer<UInt8>, deadline: Double = .never) throws -> Int {
+    public func read(into: UnsafeMutableBufferPointer<UInt8>, deadline: Double) throws -> Int {
         guard !into.isEmpty else {
             return 0
         }
@@ -139,7 +143,7 @@ extension File {
         return bytesRead
     }
 
-    public func readAll(bufferSize: Int = 2048, deadline: Double = .never) throws -> Buffer {
+    public func readAll(bufferSize: Int = 2048, deadline: Double) throws -> Buffer {
         var buffer = Buffer.empty
         
         while true {

@@ -91,7 +91,7 @@ public final class SSLStream : Stream {
     }
 
     
-    public func write(_ buffer: UnsafeBufferPointer<UInt8>, deadline: Double = .never) throws {
+    public func write(_ buffer: UnsafeBufferPointer<UInt8>, deadline: Double) throws {
         var remaining = buffer
         while !remaining.isEmpty {
             let bytesWritten = try session.write(remaining)

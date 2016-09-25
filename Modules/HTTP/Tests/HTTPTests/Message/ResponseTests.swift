@@ -16,8 +16,8 @@ public class ResponseTests : XCTestCase {
         XCTAssertTrue(response.body.isReader)
 
         response = Response { stream in
-            try stream.write("foo")
-            try stream.flush()
+            try stream.write("foo", deadline: 1.second.fromNow())
+            try stream.flush(deadline: 1.second.fromNow())
         }
         XCTAssertEqual(response.status, .ok)
         XCTAssertEqual(response.version, Version(major: 1, minor: 1))

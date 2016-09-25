@@ -39,7 +39,7 @@ public enum JSONMapParserError : Error, CustomStringConvertible {
 public final class JSONMapParser : MapParser {
     fileprivate let stream: InputStream
     fileprivate var buffer: Buffer
-    fileprivate var deadline: Double = 0
+    fileprivate var deadline: Double = .never
 
     public init(stream: InputStream) {
         self.stream = stream

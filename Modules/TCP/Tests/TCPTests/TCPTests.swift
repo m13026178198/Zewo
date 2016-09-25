@@ -4,7 +4,7 @@ import XCTest
 
 public class TCPTests : XCTestCase {
     func testConnectionRefused() throws {
-        let connection = try TCPStream(host: "127.0.0.1", port: 1111)
+        let connection = try TCPStream(host: "127.0.0.1", port: 1111, deadline: 1.second.fromNow())
         XCTAssertThrowsError(try connection.open(deadline: 1.second.fromNow()))
     }
 
@@ -20,7 +20,7 @@ public class TCPTests : XCTestCase {
             }
         }
 
-        let stream = try TCPStream(host: "127.0.0.1", port: port)
+        let stream = try TCPStream(host: "127.0.0.1", port: port, deadline: 1.second.fromNow())
         try stream.open(deadline: 1.second.fromNow())
         stream.close()
         XCTAssertThrowsError(try stream.write([1, 2, 3], deadline: 1.second.fromNow()))
@@ -38,7 +38,7 @@ public class TCPTests : XCTestCase {
             }
         }
 
-        let connection = try TCPStream(host: "127.0.0.1", port: port)
+        let connection = try TCPStream(host: "127.0.0.1", port: port, deadline: 1.second.fromNow())
         try connection.open(deadline: 1.second.fromNow())
         connection.close()
         XCTAssertThrowsError(try connection.flush(deadline: 1.second.fromNow()))
@@ -56,7 +56,7 @@ public class TCPTests : XCTestCase {
             }
         }
 
-        let connection = try TCPStream(host: "127.0.0.1", port: port)
+        let connection = try TCPStream(host: "127.0.0.1", port: port, deadline: 1.second.fromNow())
         try connection.open(deadline: 1.second.fromNow())
         connection.close()
         XCTAssertThrowsError(try connection.read(upTo: 1, deadline: 1.second.fromNow()))
@@ -78,10 +78,10 @@ public class TCPTests : XCTestCase {
             }
         }
 
-        let connection = try TCPStream(host: "127.0.0.1", port: port)
+        let connection = try TCPStream(host: "127.0.0.1", port: port, deadline: 1.second.fromNow())
         try connection.open(deadline: 1.second.fromNow())
-        try connection.write(Buffer([123]))
-        try connection.flush()
+        try connection.write([123], deadline: 1.second.fromNow())
+        try connection.flush(deadline: 1.second.fromNow())
     }
 
     func testClientServer() throws {
@@ -109,7 +109,7 @@ public class TCPTests : XCTestCase {
             }
         }
 
-        let stream = try TCPStream(host: "127.0.0.1", port: port)
+        let stream = try TCPStream(host: "127.0.0.1", port: port, deadline: 1.second.fromNow())
         try stream.open(deadline: 1.second.fromNow())
 
         let buffer = try stream.read(upTo: 3, deadline: 1.second.fromNow())

@@ -2,7 +2,7 @@ public struct TCPTLSStream : Stream {
     public let tcpStream: TCPStream
     public let sslStream: SSLStream
 
-    public init(host: String, port: Int, verifyBundle: String? = nil, certificate: String? = nil, privateKey: String? = nil, certificateChain: String? = nil, sniHostname: String? = nil, deadline: Double = .never) throws {
+    public init(host: String, port: Int, verifyBundle: String? = nil, certificate: String? = nil, privateKey: String? = nil, certificateChain: String? = nil, sniHostname: String? = nil, deadline: Double) throws {
         self.tcpStream = try TCPStream(host: host, port: port, deadline: deadline)
         let context = try Context(
             verifyBundle: verifyBundle,

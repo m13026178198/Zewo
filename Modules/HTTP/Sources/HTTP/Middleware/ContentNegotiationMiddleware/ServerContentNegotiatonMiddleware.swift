@@ -28,7 +28,7 @@ public struct ServerContentNegotiationMiddleware : Middleware {
     public func bufferRespond(to request: Request, chainingTo chain: Responder) throws -> Response {
         var request = request
 
-        let buffer = try request.body.becomeBuffer()
+        let buffer = try request.body.becomeBuffer(deadline: .never)
 
         if let contentType = request.contentType {
             do {

@@ -39,7 +39,7 @@ public struct ClientContentNegotiationMiddleware : Middleware {
 
         var response = try chain.respond(to: request)
 
-        let buffer = try response.body.becomeBuffer()
+        let buffer = try response.body.becomeBuffer(deadline: .never)
 
         if let contentType = response.contentType {
             let (_, content) = try parse(buffer: buffer, deadline: .never, mediaType: contentType, in: types)
