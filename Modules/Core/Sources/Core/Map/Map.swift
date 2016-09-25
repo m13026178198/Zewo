@@ -44,20 +44,6 @@ public enum MapError : Error {
 
 // MARK: Parser/Serializer Protocols
 
-//public protocol MapParser {
-//    func parse(_ buffer: Buffer) throws -> Map
-//}
-//
-//extension MapParser {
-//    public func parse(_ convertible: BufferRepresentable) throws -> Map {
-//        return try parse(convertible.buffer)
-//    }
-//}
-//
-//public protocol MapSerializer {
-//    func serialize(_ map: Map) throws -> Buffer
-//}
-
 public protocol MapParser {
     init(stream: InputStream)
     func parse(deadline: Double) throws -> Map
