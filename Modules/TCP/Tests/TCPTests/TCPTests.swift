@@ -90,7 +90,7 @@ public class TCPTests : XCTestCase {
         co {
             do {
                 let host = try TCPHost(host: "127.0.0.1", port: port)
-                let stream = try host.accept()
+                let stream = try host.accept(deadline: 1.second.fromNow())
 
                 let deadline = 30.milliseconds.fromNow()
                 XCTAssertThrowsError(try stream.read(upTo: 16, deadline: deadline))

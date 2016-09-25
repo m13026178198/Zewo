@@ -28,7 +28,7 @@ final class BodyStream : Stream {
         }
         
         if closed {
-            throw StreamError.closedStream(buffer: Buffer(bytes: buffer))
+            throw StreamError.closedStream
         }
         
         let newLine: [UInt8] = [13, 10]

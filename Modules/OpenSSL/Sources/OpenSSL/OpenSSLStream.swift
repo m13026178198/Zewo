@@ -70,22 +70,12 @@ public final class SSLStream : Stream {
                 }
                 return bytesRead
             } catch SSLSessionError.wantRead {
-                do {
-                    try rawBuffer.withUnsafeMutableBufferPointer { buffer in
-                        let bytesRead = try self.rawStream.read(into: buffer, deadline: deadline)
-                        _ = try self.readIO.write(UnsafeBufferPointer<UInt8>(start: buffer.baseAddress!, count: bytesRead))
-                    }
-                } catch StreamError.closedStream(let buffer) {
-                    guard !buffer.isEmpty else {
-                        throw StreamError.closedStream(buffer: Buffer())
-                    }
-                    _ = try buffer.withUnsafeBytes { bufferBytes in
-                        try readIO.write(UnsafeBufferPointer<UInt8>(start: bufferBytes, count: buffer.count))
-                    }
-                    
+                try rawBuffer.withUnsafeMutableBufferPointer { buffer in
+                    let bytesRead = try self.rawStream.read(into: buffer, deadline: deadline)
+                    _ = try self.readIO.write(UnsafeBufferPointer<UInt8>(start: buffer.baseAddress!, count: bytesRead))
                 }
             } catch SSLSessionError.zeroReturn {
-                throw StreamError.closedStream(buffer: Buffer())
+                throw StreamError.closedStream
             }
         }
     }

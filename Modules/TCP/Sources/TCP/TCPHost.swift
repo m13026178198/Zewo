@@ -15,14 +15,19 @@ public final class TCPHost : Host {
 
     public init(host: String = "0.0.0.0", port: Int = 8080, backlog: Int = 128, reusePort: Bool = false) throws {
         self.ip = try IP(localAddress: host, port: port)
-        self.socket = tcplisten(ip.address, Int32(backlog), reusePort ? 1 : 0)
+        guard let socket = tcplisten(ip.address, Int32(backlog), reusePort ? 1 : 0) else {
+            throw TCPError.failedToCreateSocket
+        }
         try ensureLastOperationSucceeded()
+        self.socket = socket
     }
 
     public func accept(deadline: Double) throws -> Stream {
-        let acceptSocket = tcpaccept(self.socket, deadline.int64milliseconds)
+        guard let acceptSocket = tcpaccept(socket, deadline.int64milliseconds) else {
+            throw TCPError.failedToCreateSocket
+        }
         try ensureLastOperationSucceeded()
-        return try TCPStream(with: acceptSocket!)
+        return try TCPStream(with: acceptSocket)
     }
     
     deinit {

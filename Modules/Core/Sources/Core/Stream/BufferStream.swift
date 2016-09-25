@@ -20,7 +20,7 @@ public final class BufferStream : Stream {
     
     public func read(into targetBuffer: UnsafeMutableBufferPointer<UInt8>, deadline: Double) throws -> Int {
         if closed && buffer.count == 0 {
-            throw StreamError.closedStream(buffer: Buffer.empty)
+            throw StreamError.closedStream
         }
         
         guard !buffer.isEmpty else {

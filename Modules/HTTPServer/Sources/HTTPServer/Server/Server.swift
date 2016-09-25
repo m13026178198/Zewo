@@ -146,7 +146,7 @@ extension Server {
         printHeader()
         try retry(times: 10, waiting: 5.seconds) {
             while true {
-                let stream = try tcpHost.accept()
+                let stream = try tcpHost.accept(deadline: .never)
                 co { do { try self.process(stream: stream) } catch { self.failure(error) } }
             }
         }

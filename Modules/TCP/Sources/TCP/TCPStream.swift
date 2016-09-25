@@ -1,7 +1,6 @@
 import CLibvenice
 import Core
 
-
 public final class TCPStream : Stream {
     public var ip: IP
     var socket: tcpsock?
@@ -21,34 +20,37 @@ public final class TCPStream : Stream {
     }
 
     public func open(deadline: Double) throws {
-        self.socket = tcpconnect(ip.address, deadline.int64milliseconds)
+        guard let socket = tcpconnect(ip.address, deadline.int64milliseconds) else {
+            throw TCPError.failedToCreateSocket
+        }
         try ensureLastOperationSucceeded()
+        self.socket = socket
         self.closed = false
     }
 
     public func write(_ buffer: UnsafeBufferPointer<UInt8>, deadline: Double) throws {
+        let socket = try getSocket()
+        try ensureStreamIsOpen()
+
         guard !buffer.isEmpty else {
             return
         }
         
-        let socket = try getSocket()
-        try ensureStreamIsOpen()
-        
         let bytesWritten = tcpsend(socket, buffer.baseAddress!, buffer.count, deadline.int64milliseconds)
+        try ensureLastOperationSucceeded()
         
         guard bytesWritten == buffer.count else {
-            try ensureLastOperationSucceeded()
             throw SystemError.other(errorNumber: -1)
         }
     }
     
     public func read(into buffer: UnsafeMutableBufferPointer<UInt8>, deadline: Double) throws -> Int {
+        let socket = try getSocket()
+        try ensureStreamIsOpen()
+
         guard !buffer.isEmpty else {
             return 0
         }
-        
-        let socket = try getSocket()
-        try ensureStreamIsOpen()
         
         let bytesRead = tcprecvlh(socket, buffer.baseAddress!, 1, buffer.count, deadline.int64milliseconds)
         
@@ -57,7 +59,7 @@ public final class TCPStream : Stream {
                 try ensureLastOperationSucceeded()
             } catch SystemError.connectionResetByPeer {
                 closed = true
-                throw StreamError.closedStream(buffer: Buffer())
+                throw StreamError.closedStream
             }
         }
         
@@ -89,7 +91,7 @@ public final class TCPStream : Stream {
 
     private func ensureStreamIsOpen() throws {
         if closed {
-            throw StreamError.closedStream(buffer: Buffer())
+            throw StreamError.closedStream
         }
     }
 
