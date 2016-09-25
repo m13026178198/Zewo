@@ -127,15 +127,34 @@ extension Dictionary : MapFallibleRepresentable {
         guard Key.self is MapDictionaryKeyRepresentable.Type else {
             throw MapError.notMapDictionaryKeyRepresentable(Value.self)
         }
-        guard Value.self is MapFallibleRepresentable.Type else {
-            throw MapError.notMapRepresentable(Value.self)
-        }
+        
         var dictionary = [String: Map](minimumCapacity: count)
-        for (key, value) in self {
-            let value = value as! MapFallibleRepresentable
-            let key = key as! MapDictionaryKeyRepresentable
-            dictionary[key.mapDictionaryKey] = try value.asMap()
+        
+        if Value.self is MapFallibleRepresentable.Type {
+            for (key, value) in self {
+                let value = value as! MapFallibleRepresentable
+                let key = key as! MapDictionaryKeyRepresentable
+                dictionary[key.mapDictionaryKey] = try value.asMap()
+            }
+        } else if Value.self is MapRepresentable.Type {
+            for (key, value) in self {
+                let value = value as! MapRepresentable
+                let key = key as! MapDictionaryKeyRepresentable
+                dictionary[key.mapDictionaryKey] = value.map
+            }
+        } else {
+            for (key, value) in self {
+                let key = key as! MapDictionaryKeyRepresentable
+                if let value = value as? MapFallibleRepresentable {
+                    dictionary[key.mapDictionaryKey] = try value.asMap()
+                } else if let value = value as? MapRepresentable {
+                    dictionary[key.mapDictionaryKey] = value.map
+                } else {
+                    throw MapError.notMapRepresentable(type(of: value))
+                }
+            }
         }
+        
         return .dictionary(dictionary)
     }
 }
