@@ -12,22 +12,22 @@ public struct Buffer : RandomAccessCollection {
     public typealias Index = Int
     public typealias Indices = DefaultRandomAccessIndices<Buffer>
     
-    public private(set) var bytes: [Byte]
+    public private(set) var bytes: ContiguousArray<Byte>
     
     public var count: Int {
         return bytes.count
     }
     
     public init(_ bytes: [Byte] = []) {
-        self.bytes = bytes
+        self.bytes = ContiguousArray(bytes)
     }
     
     public init(bytes: [Byte]) {
-        self.bytes = bytes
+        self.bytes = ContiguousArray(bytes)
     }
     
     public init(bytes buffer: UnsafeBufferPointer<UInt8>) {
-        self.bytes = [Byte](buffer)
+        self.bytes = ContiguousArray(buffer)
     }
     
     public mutating func append(_ other: Buffer) {
@@ -113,11 +113,11 @@ public struct Buffer : RandomAccessCollection {
 
 public struct BufferIterator : IteratorProtocol, Sequence {
     
-    private var bytes: [Byte]
+    private var bytes: ContiguousArray<Byte>
     private var position: Buffer.Index
     private var count: Int
     
-    fileprivate init(bytes: [Byte]) {
+    fileprivate init(bytes: ContiguousArray<Byte>) {
         self.bytes = bytes
         self.position = bytes.startIndex
         self.count = bytes.count
