@@ -64,7 +64,7 @@ extension Request {
 
         switch body {
         case let .buffer(body):
-            self.headers["Content-Length"] = body.count.description
+            self.headers["Content-Length"] = "\(body.count)"
         default:
             self.headers["Transfer-Encoding"] = "chunked"
         }
