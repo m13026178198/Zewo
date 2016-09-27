@@ -51,10 +51,6 @@ extension OutputStream {
         try write(converting.buffer, deadline: deadline)
     }
     
-    public func write(_ converting: String, deadline: Double = .never) throws {
-        try write([UInt8](converting.utf8), deadline: deadline)
-    }
-    
     public func write(_ bytes: [UInt8], deadline: Double = .never) throws {
         guard !bytes.isEmpty else {
             return

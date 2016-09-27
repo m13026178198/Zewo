@@ -5,61 +5,63 @@ import Glibc
 import Darwin
 #endif
 
+public typealias Byte = UInt8
+
 public struct Buffer : RandomAccessCollection {
     public typealias Iterator = BufferIterator
     public typealias Index = Int
     public typealias Indices = DefaultRandomAccessIndices<Buffer>
     
-    public private(set) var bytes: [UInt8]
+    public private(set) var bytes: [Byte]
     
     public var count: Int {
         return bytes.count
     }
     
-    public init(_ bytes: [UInt8] = []) {
+    public init(_ bytes: [Byte] = []) {
         self.bytes = bytes
     }
     
-    public init(bytes: [UInt8]) {
+    public init(bytes: [Byte]) {
         self.bytes = bytes
     }
     
     public init(bytes buffer: UnsafeBufferPointer<UInt8>) {
-        self.bytes = [UInt8](buffer)
+        self.bytes = [Byte](buffer)
     }
     
     public mutating func append(_ other: Buffer) {
         bytes += other.bytes
     }
     
-    public mutating func append(_ other: [UInt8]) {
+    public mutating func append(_ other: [Byte]) {
         bytes += other
     }
     
-    public mutating func append(_ other: UnsafeBufferPointer<UInt8>) {
+    public mutating func append(_ other: UnsafeBufferPointer<Byte>) {
         guard other.count > 0 else {
             return
         }
-        bytes += [UInt8](other)
+        bytes += [Byte](other)
     }
     
-    public mutating func append(_ other: UnsafePointer<UInt8>, count: Int) {
+    public mutating func append(_ other: UnsafePointer<Byte>, count: Int) {
         guard count > 0 else {
             return
         }
         bytes += [UInt8](UnsafeBufferPointer(start: other, count: count))
     }
     
-    public subscript(index: Index) -> UInt8 {
+    public subscript(index: Index) -> Byte {
         return bytes[index]
     }
     
     public subscript(bounds: Range<Int>) -> Buffer {
-        return Buffer(bytes: [UInt8](bytes[bounds]))
+        return Buffer(bytes: [Byte](bytes[bounds]))
     }
     
     public subscript(bounds: CountableRange<Int>) -> Buffer {
-        return Buffer(bytes: [UInt8](bytes[bounds]))
+        return Buffer(bytes: [Byte](bytes[bounds]))
     }
     
     public var startIndex: Int {
@@ -82,11 +84,11 @@ public struct Buffer : RandomAccessCollection {
         return BufferIterator(bytes: bytes)
     }
     
-    public func copyBytes(to pointer: UnsafeMutablePointer<UInt8>, count: Int) {
+    public func copyBytes(to pointer: UnsafeMutablePointer<Byte>, count: Int) {
         copyBytes(to: UnsafeMutableBufferPointer(start: pointer, count: count))
     }
     
-    public func copyBytes(to pointer: UnsafeMutableBufferPointer<UInt8>) {
+    public func copyBytes(to pointer: UnsafeMutableBufferPointer<Byte>) {
         guard pointer.count > 0 else {
             return
         }
@@ -111,17 +113,17 @@ public struct Buffer : RandomAccessCollection {
 
 public struct BufferIterator : IteratorProtocol, Sequence {
     
-    private var bytes: [UInt8]
+    private var bytes: [Byte]
     private var position: Buffer.Index
     private var count: Int
     
-    fileprivate init(bytes: [UInt8]) {
+    fileprivate init(bytes: [Byte]) {
         self.bytes = bytes
         self.position = bytes.startIndex
         self.count = bytes.count
     }
     
-    public mutating func next() -> UInt8? {
+    public mutating func next() -> Byte? {
         if position == count {
             return nil
         }
@@ -154,26 +156,18 @@ public protocol BufferConvertible : BufferInitializable, BufferRepresentable {}
 extension Buffer {
     
     public init(_ string: String) {
-        self = string.utf8CString.withUnsafeBufferPointer { bufferPtr in
-            guard bufferPtr.count > 1 else {
-                return Buffer()
-            }
-            
-            return bufferPtr.baseAddress!.withMemoryRebound(to: UInt8.self, capacity: bufferPtr.count) { ptr in
-                return Buffer(bytes: UnsafeBufferPointer<UInt8>(start: ptr, count: bufferPtr.count - 1))
-            }
-        }
+        self = Buffer([Byte](string.utf8))
     }
     
-    public init(count: Int, fill: (UnsafeMutableBufferPointer<UInt8>) throws -> Void) rethrows {
+    public init(count: Int, fill: (UnsafeMutableBufferPointer<Byte>) throws -> Void) rethrows {
         self = try Buffer(capacity: count) {
             try fill($0)
             return count
         }
     }
     
-    public init(capacity: Int, fill: (UnsafeMutableBufferPointer<UInt8>) throws -> Int) rethrows {
-        var bytes = [UInt8](repeating: 0, count: capacity)
+    public init(capacity: Int, fill: (UnsafeMutableBufferPointer<Byte>) throws -> Int) rethrows {
+        var bytes = [Byte](repeating: 0, count: capacity)
         let usedCapacity = try bytes.withUnsafeMutableBufferPointer { try fill($0) }
         
         guard usedCapacity > 0 else {
@@ -181,13 +175,13 @@ extension Buffer {
             return
         }
         
-        self = Buffer(bytes: [UInt8](bytes[0..<usedCapacity]))
+        self = Buffer(bytes: [Byte](bytes[0..<usedCapacity]))
     }
 }
 
 extension String : BufferConvertible {
     public init(buffer: Buffer) throws {
-        guard let string = String(bytes: buffer, encoding: .utf8) else {
+        guard let string = String(bytes: buffer.bytes, encoding: .utf8) else {
             throw StringError.invalidString
         }
         self = string
