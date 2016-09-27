@@ -5,7 +5,7 @@ import Venice
 public class Cursor {
     
     internal enum Query {
-        case start(token: Int64, buffer: Buffer, opts: ReqlGlobalOpts?)
+        case start(token: Int64, payload: String, opts: ReqlGlobalOpts?)
         case continuation(token: Int64, type: ReqlProtocol.QueryType)
     }
     

@@ -119,10 +119,19 @@ extension ConnectionStream {
         let token: Int64 = try self.read(deadline: deadline)
         let length: Int32 = try self.read(deadline: deadline)
         
-        var buffer: Buffer = Buffer()
+        
+        var buffer: [UInt8] = []
+        let chunkBytes = UnsafeMutablePointer<UInt8>.allocate(capacity: 2048)
+        defer {
+            chunkBytes.deallocate(capacity: 2048)
+        }
         while buffer.count < Int(length) {
-            let chunk = try self.read(upTo: Int(length) - buffer.count, deadline: deadline)
-            buffer.append(chunk)
+            let capacity = min(Int(length) - buffer.count, 2048)
+            let bytesRead = try self.read(into: UnsafeMutableBufferPointer(start: chunkBytes, count: capacity), deadline: deadline)
+            guard bytesRead > 0 else {
+                continue
+            }
+            buffer += [UInt8](UnsafeBufferPointer(start: chunkBytes, count: bytesRead))
         }
         
         let map: Map
@@ -168,24 +177,26 @@ extension ConnectionStream {
         case .start(let token, let buffer, let opts):
             try self.write(token, deadline: deadline)
             
-            var payload = Buffer()
-            payload.append(Buffer("[\(ReqlProtocol.QueryType.start.rawValue),"))
-            payload.append(buffer)
+            var payload = ""
+            payload += "[" + ReqlProtocol.QueryType.start.rawValue.description + ","
+            payload += buffer
             if let opts = opts {
-                payload.append(Buffer(",\(try opts.rawValue.reqlJSON())]"))
+                payload += ","
+                payload += try opts.rawValue.reqlJSON()
+                payload += "]"
             } else {
-                payload.append(Buffer(",{}]"))
+                payload += ",{}]"
             }
             
-            try self.write(Int32(payload.count), deadline: deadline)
+            try self.write(Int32(payload.lengthOfBytes(using: .utf8)), deadline: deadline)
             try self.write(payload, deadline: deadline)
 
         case .continuation(let token, let type):
             try self.write(token)
             
-            let payload = Buffer("[\(type.rawValue)]")
+            let payload = "[" + type.rawValue.description + "]"
             
-            try self.write(Int32(payload.count), deadline: deadline)
+            try self.write(Int32(payload.lengthOfBytes(using: .utf8)), deadline: deadline)
             try self.write(payload, deadline: deadline)
         }
     }
