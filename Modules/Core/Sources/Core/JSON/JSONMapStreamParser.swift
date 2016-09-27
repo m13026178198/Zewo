@@ -42,7 +42,7 @@ public final class JSONMapStreamParser : MapStreamParser {
 
     public init(stream: Stream) {
         self.stream = stream
-        self.buffer = Buffer.empty
+        self.buffer = Buffer()
     }
 
     var lineNumber = 1
@@ -433,7 +433,7 @@ extension JSONMapStreamParser {
 
     private func advance() throws {
         if !buffer.isEmpty {
-            buffer = buffer.subdata(in: buffer.startIndex.advanced(by: 1)..<buffer.endIndex)
+            buffer = buffer[buffer.startIndex.advanced(by: 1)..<buffer.endIndex]
         }
         
         if bytesInBuffer > 0 {

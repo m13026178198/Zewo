@@ -42,18 +42,8 @@ extension OutputStream {
             return
         }
         
-        var rethrowError: Error? = nil
-        buffer.enumerateBytes { bufferPtr, _, stop in
-            do {
-                try write(bufferPtr, deadline: deadline)
-            } catch {
-                rethrowError = error
-                stop = true
-            }
-        }
-        
-        if let error = rethrowError {
-            throw error
+        try buffer.bytes.withUnsafeBufferPointer {
+            try write($0, deadline: deadline)
         }
     }
     

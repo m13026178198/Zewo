@@ -14,18 +14,9 @@ extension Parser {
             return
         }
         
-        var rethrowError: Error? = nil
-        buffer.enumerateBytes { (bufferPointer, _, stop) in
-            do {
-                try self.parse(bufferPointer, handler: handler)
-            } catch {
-                rethrowError = error
-                stop = true
-            }
-        }
         
-        guard rethrowError == nil else {
-            throw rethrowError!
+        try buffer.bytes.withUnsafeBufferPointer {
+            try self.parse($0, handler: handler)
         }
     }
     
