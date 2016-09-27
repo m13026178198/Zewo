@@ -35,7 +35,7 @@ public class Parser: Core.Parser {
         func addValueForCurrentHeaderField(_ value: String) {
             let key = currentHeaderField!
             if let existing = headers[key] {
-                headers[key] = "\(existing), \(value)"
+                headers[key] = existing + ", " + value
             } else {
                 headers[key] = value
             }

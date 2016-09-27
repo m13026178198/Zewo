@@ -64,7 +64,7 @@ extension Request {
 
         switch body {
         case let .buffer(body):
-            self.headers["Content-Length"] = "\(body.count)"
+            self.headers["Content-Length"] = body.count.description
         default:
             self.headers["Transfer-Encoding"] = "chunked"
         }
@@ -173,7 +173,7 @@ extension Request {
         }
 
         set(accept) {
-            headers["Accept"] = accept.map({"\($0.type)/\($0.subtype)"}).joined(separator: ", ")
+            headers["Accept"] = accept.map({$0.type + "/" + $0.subtype}).joined(separator: ", ")
         }
     }
 
