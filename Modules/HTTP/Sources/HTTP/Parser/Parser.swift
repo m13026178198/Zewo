@@ -30,7 +30,6 @@ public class Parser: Core.Parser {
         var headers: [CaseInsensitiveString: String] = [:]
         var body: Buffer = Buffer()
         
-        var currentBuffer = Buffer()
         var currentHeaderField: CaseInsensitiveString? = nil
         
         func addValueForCurrentHeaderField(_ value: String) {
@@ -49,6 +48,7 @@ public class Parser: Core.Parser {
     
     private var state: State = .none
     private var context = Context()
+    private var buffer: [UInt8] = []
     
     private var messages: [Message] = []
     
@@ -174,21 +174,21 @@ public class Parser: Core.Parser {
                 break
                 
             case .url:
-                let string = String(bytes: context.currentBuffer, encoding: String.Encoding.utf8)!
+                let string = String(bytes: buffer, encoding: String.Encoding.utf8)!
                 context.url = URL(string: string)!
                 
             case .status:
-                let string = String(bytes: context.currentBuffer, encoding: String.Encoding.utf8)!
+                let string = String(bytes: buffer, encoding: String.Encoding.utf8)!
                 context.status = Response.Status(statusCode: Int(parser.status_code),
                                                  reasonPhrase: string)
                 
             case .headerField:
-                let string = String(bytes: context.currentBuffer, encoding: String.Encoding.utf8)!
+                let string = String(bytes: buffer, encoding: String.Encoding.utf8)!
                 context.currentHeaderField = CaseInsensitiveString(string)
                 
                 
             case .headerValue:
-                let string = String(bytes: context.currentBuffer, encoding: String.Encoding.utf8)!
+                let string = String(bytes: buffer, encoding: String.Encoding.utf8)!
                 context.addValueForCurrentHeaderField(string)
                 
             case .headersComplete:
@@ -197,11 +197,11 @@ public class Parser: Core.Parser {
                 context.version = Version(major: Int(parser.http_major), minor: Int(parser.http_minor))
                 
             case .body:
-                context.body = context.currentBuffer
+                context.body = Buffer(buffer)
                 
             }
             
-            context.currentBuffer = DispatchData.empty
+            buffer = []
             state = newState
             
             if state == .messageComplete {
@@ -222,7 +222,7 @@ public class Parser: Core.Parser {
                             .map { $0.value }
                             .reduce(Set<String>()) { initial, value in
                                 return initial.union(Set(value.components(separatedBy: ", ")))
-                    }
+                            }
                     
                     let response = Response(version: context.version!,
                                             status: context.status!,
@@ -245,7 +245,9 @@ public class Parser: Core.Parser {
         }
         
         data.baseAddress!.withMemoryRebound(to: UInt8.self, capacity: data.count) { ptr in
-            self.context.currentBuffer.append(ptr, count: data.count)
+            for i in 0..<data.count {
+                self.buffer.append(ptr[i])
+            }
         }
     }
     
